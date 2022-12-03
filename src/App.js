@@ -1,24 +1,35 @@
 import './App.css';
+import React from 'react';
+import { connect } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './Routes';
+import { Template } from './components/MainComponents';
+import Header from './components/partials/Header';
+import Footer from './components/partials/Footer'; 
 
-function App() {
+
+const Page = (props) => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Olá Mundo!!!
+    <BrowserRouter>
+    <Template>
+      <Header />
+      <Routes />
+      <Footer />
+      </Template>     
+    </BrowserRouter>
+  )
+} 
 
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const mapStateToProps = (state) => {
+  return {
+    user: state.user
+  }
 }
 
-export default App;
+const mapDisptchToProps = (dispatch) => {
+  return {
+
+  }
+}
+
+export default connect(mapStateToProps, mapDisptchToProps) (Page)
