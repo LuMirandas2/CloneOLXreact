@@ -2,27 +2,26 @@ import React, { useState, useEffect } from "react";
 import { PageArea } from "./styled";
 import { PageContainer } from "../../components/MainComponents";
 import { useLocation, useHistory } from "react-router-dom";
-import useApi from "../../helpers/OlxAPI";
 import AdItem from "../../components/partials/AdItem";
+import useApi from "../../helpers/OlxAPI";
 
 let timer;
-
-function Page() {
+const Page = () => {
   const api = useApi();
   const history = useHistory();
 
-  const UseQueryString = () => {
+  const useQueryString = () => {
     return new URLSearchParams(useLocation().search);
   };
 
-  const query = UseQueryString();
+  const query = useQueryString();
 
-  const [q, setQ] = useState(query.get("q") !== null ? query.get("q") : "");
+  const [q, setQ] = useState(query.get("q") != null ? query.get("q") : "");
   const [cat, setCat] = useState(
-    query.get("cat") !== null ? query.get("cat") : ""
+    query.get("cat") != null ? query.get("cat") : ""
   );
   const [state, setState] = useState(
-    query.get("state") !== null ? query.get("state") : ""
+    query.get("state") != null ? query.get("state") : ""
   );
 
   useEffect(() => {
@@ -47,15 +46,31 @@ function Page() {
     setCurrentPage(1);
   }, [q, cat, state]);
 
-  const [currentPage, setCurrentPage] = useState(1);
   const [stateList, setStateList] = useState([]);
   const [categories, setCategories] = useState([]);
   const [adList, setAdList] = useState([]);
-  const [resulteOpacity, setResultOpacity] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resultOpacity, setResultOpacity] = useState(1);
   const [adsTotal, setAdsTotal] = useState(0);
   const [pageCount, setPageCount] = useState(0);
-  const [warningMessage, setWarningMessage] = useState("Carregando...");
+  const [warningMessage, setWarningMessage] = useState("Carregando....");
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getState = async () => {
+      const sList = await api.getState();
+      setStateList(sList);
+    };
+    getState();
+  }, []);
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const cats = await api.getCategories();
+      setCategories(cats);
+    };
+    getCategories();
+  }, []);
 
   const getAdsList = async () => {
     setLoading(true);
@@ -77,7 +92,7 @@ function Page() {
 
   useEffect(() => {
     if (adsTotal > 0) {
-      setPageCount(Math.ceil(adsTotal / adList.lenght));
+      setPageCount(Math.ceil(adsTotal / adList.length));
     } else {
       setPageCount(0);
     }
@@ -87,22 +102,6 @@ function Page() {
     setResultOpacity(0.3);
     getAdsList();
   }, [currentPage]);
-
-  useEffect(() => {
-    const getStates = async () => {
-      const states = await api.getStates();
-      setStateList(states);
-    };
-    getStates();
-  }, []);
-
-  useEffect(() => {
-    const getCategories = async () => {
-      const categories = await api.getCAtegories();
-      setCategories(categories);
-    };
-    getCategories();
-  }, []);
 
   let pagination = [];
   for (let i = 0; i <= pageCount; i++) {
@@ -116,19 +115,18 @@ function Page() {
           <form method="GET">
             <input
               type="text"
-              nome="q"
-              placeholder="O que você procura"
+              name="q"
+              placeholder="O que você procura?"
               value={q}
-              onChange={(e) => setQ(e.targer.value)}
+              onChange={(e) => setQ(e.target.value)}
             />
-
-            <div className="filterName">Estado</div>
+            <div className="filterName">Estado:</div>
             <select
-              nome="state"
+              name="state"
               value={state}
               onChange={(e) => setState(e.target.value)}
             >
-              <option></option>
+              <option value=""></option>
               {stateList.map((state, index) => (
                 <option key={index} value={state.id}>
                   {state.name}
@@ -141,12 +139,14 @@ function Page() {
                 <li
                   key={index}
                   className={
-                    cat === category.slug ? "categoryItem active" : "category"
+                    cat === category.slug
+                      ? "categoryItem active"
+                      : "categoryItem"
                   }
                   onClick={() => setCat(category.slug)}
                 >
                   <img src={category.img} alt="" />
-                  <span>category.name</span>
+                  <span>{category.name}</span>
                 </li>
               ))}
             </ul>
@@ -154,22 +154,22 @@ function Page() {
         </div>
         <div className="rightSide">
           <h2>Resultados</h2>
-          {loading && adList.lenght === 0 && (
-            <div className="ListWarning">Carregand0...</div>
+          {loading && adList.length === 0 && (
+            <div className="ListWarning">Carregando...</div>
           )}
-          {!loading && adList.lenght === 0 && (
-            <div className="ListWarning">Nenhum Resultado Encontrado</div>
+          {!loading && adList.length === 0 && (
+            <div className="ListWarning">nenhum Resultado Encontrado</div>
           )}
           <div className="list" style={{ opacity: resultOpacity }}>
             {adList.map((ad, index) => (
-              <AdItem key={index} dataa={ad} />
+              <AdItem key={index} data={ad} />
             ))}
           </div>
           <div className="pagination">
             {pagination.map((pg, index) => (
               <div
-                key={index}
                 onClick={() => setCurrentPage(pg)}
+                key={index}
                 className={pg === currentPage ? "pagItem active" : "pagItem"}
               >
                 {pg}
@@ -180,6 +180,6 @@ function Page() {
       </PageArea>
     </PageContainer>
   );
-}
+};
 
 export default Page;
